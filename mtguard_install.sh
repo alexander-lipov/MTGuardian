@@ -60,17 +60,22 @@ read -p "Enter MT core arguments (default: $DEFAULT_MT_CORE_ARGS): " mt_core_arg
 mt_core_args=${mt_core_args:-$DEFAULT_MT_CORE_ARGS}
 read -p "Enter your server name (default: $DEFAULT_MT_CORE_SERVER_NAME): " mt_core_server_name
 mt_core_server_name=${mt_core_server_name:-$DEFAULT_MT_CORE_SERVER_NAME}
-read -p "Enter your Telegram bot API token (default: $DEFAULT_TG_API_TOKEN): " tg_api_token
+read -p "Enter your Telegram bot API token (default: Skip with 8): " tg_api_token
 tg_api_token=${tg_api_token:-$DEFAULT_TG_API_TOKEN}
-read -p "Enter your Telegram chat ID (default: $DEFAULT_TG_CHAT_ID): " tg_chat_id
+read -p "Enter your Telegram chat ID (default: Skip with 8): " tg_chat_id
 tg_chat_id=${tg_chat_id:-$DEFAULT_TG_CHAT_ID}
 
-# Update settings file
+# Check if user opted to skip TG configuration
+if [[ "$tg_api_token" == "8" || "$tg_chat_id" == "8" ]]; then
+    echo "Skipping Telegram configuration."
+else
+    sed -i "s|^TG_API_TOKEN=.*|TG_API_TOKEN='$tg_api_token'|" MTGuardian.settings
+    sed -i "s|^TG_CHAT_ID=.*|TG_CHAT_ID='$tg_chat_id'|" MTGuardian.settings
+fi
+
 sed -i "s|^MT_CORE_DIR=.*|MT_CORE_DIR='$mt_core_dir'|" MTGuardian.settings
 sed -i "s|^MT_CORE_ARGS=.*|MT_CORE_ARGS='$mt_core_args'|" MTGuardian.settings
 sed -i "s|^MT_CORE_SERVER_NAME=.*|MT_CORE_SERVER_NAME='$mt_core_server_name'|" MTGuardian.settings
-sed -i "s|^TG_API_TOKEN=.*|TG_API_TOKEN='$tg_api_token'|" MTGuardian.settings
-sed -i "s|^TG_CHAT_ID=.*|TG_CHAT_ID='$tg_chat_id'|" MTGuardian.settings
 
 # Step 5: Setting permissions
 chmod 700 MTGuardian
