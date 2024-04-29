@@ -22,13 +22,21 @@ error_check() {
 echo "Starting MTGuardian Setup Wizard..."
 
 # Step 1: Prepare Installation Directory
-echo "Preparing installation directory..."
-if [ ! -d "$INSTALL_DIR" ]; then
-    mkdir -p $INSTALL_DIR
-    error_check "Failed to create installation directory."
-else
-    echo "Directory already exists. Proceeding with setup..."
+if [ -d "$INSTALL_DIR" ] && [ "$(ls -A $INSTALL_DIR)" ]; then
+    read -p "The installation directory '$INSTALL_DIR' already exists and is not empty. Do you want to delete it? (y/n): " delete_dir
+    if [[ "$delete_dir" == "y" ]]; then
+        rm -rf $INSTALL_DIR
+        error_check "Failed to delete existing installation directory."
+        echo "Installation directory deleted."
+    else
+        echo "Aborting setup. Please clear the installation directory and run the script again."
+        exit 1
+    fi
 fi
+
+echo "Preparing installation directory..."
+mkdir -p $INSTALL_DIR
+error_check "Failed to create installation directory."
 
 cd $INSTALL_DIR
 error_check "Failed to change to installation directory."
