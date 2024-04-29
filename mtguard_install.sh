@@ -81,5 +81,38 @@ sed -i "s|^MT_CORE_SERVER_NAME=.*|MT_CORE_SERVER_NAME='$mt_core_server_name'|" M
 chmod 700 MTGuardian
 error_check "Failed to set permissions for MTGuardian."
 
+# Step 6: Check MTCore Status and Restart/Start
+echo "Checking MTCore process..."
+if pgrep -f "$mt_core_dir/MTCore" > /dev/null; then
+    read -p "MTCore is currently running. Would you like to restart it? (y/n): " confirm_restart
+    if [[ "$confirm_restart" == "y" ]]; then
+        pkill -f "$mt_core_dir/MTCore"
+        sleep 1
+        "$mt_core_dir/MTCore" $mt_core_args &
+        echo "MTCore has been restarted."
+    else
+        echo "MTCore restart skipped."
+    fi
+else
+    read -p "MTCore is not running. Would you like to start it? (y/n): " confirm_start
+    if [[ "$confirm_start" == "y" ]]; then
+        "$mt_core_dir/MTCore" $mt_core_args &
+        if [ $? -eq 0 ]; then
+            echo "MTCore has been started successfully."
+        else
+            echo "Failed to start MTCore."
+        fi
+    else
+        echo "MTCore start skipped."
+    fi
+fi
+
+# Step 7: Final Countdown before completing setup
+echo "Finalizing setup in 30 seconds..."
+for i in {30..1}; do
+    echo -ne "$i seconds remaining...\r"
+    sleep 1
+done
+
 echo "Setup completed successfully. MTGuardian is configured to run on boot."
 echo "If you want to support the further development of this script please donate to the TRC20 wallet: TCgJDoL6qFj6NaQjqirycmqSTXoQqqZ1E3"
