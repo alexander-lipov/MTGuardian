@@ -1,12 +1,11 @@
 #!/bin/bash
 
 # Set variables
-GITHUB_REPO="https://github.com/Greendq/MTGuardian"
-INSTALL_DIR="/home/ubuntu/scripts"
-RC_LOCAL_PATH="/etc/rc.local"
+GITHUB_REPO="https://github.com/alexander-lipov/MTGuardian"
+INSTALL_DIR="/home/ubuntu/MT/MTGuard/"
 
 # Default configuration values
-DEFAULT_MT_CORE_DIR="/full/path/to/mt/"
+DEFAULT_MT_CORE_DIR="$INSTALL_DIR"
 DEFAULT_MT_CORE_ARGS="--no-update"
 DEFAULT_MT_CORE_SERVER_NAME="My super server with IPv4:123.456.789.123"
 DEFAULT_TG_API_TOKEN="0000000000:AABBBBBBBBBBCCCCCCCCDDDDDDDFFFFFFFF"
@@ -22,15 +21,26 @@ error_check() {
 
 echo "Starting MTGuardian Setup Wizard..."
 
-# Step 1: Downloading Files
-echo "Downloading necessary files from GitHub..."
-mkdir -p $INSTALL_DIR
+# Step 1: Prepare Installation Directory
+echo "Preparing installation directory..."
+if [ ! -d "$INSTALL_DIR" ]; then
+    mkdir -p $INSTALL_DIR
+    error_check "Failed to create installation directory."
+else
+    echo "Directory already exists. Proceeding with setup..."
+fi
+
 cd $INSTALL_DIR
+error_check "Failed to change to installation directory."
+
+# Step 2: Downloading Files
+echo "Downloading necessary files from GitHub..."
 git clone $GITHUB_REPO .
 error_check "Failed to download files. Check your internet connection and the repository URL."
 
-# Step 2: Editing rc.local
+# Step 3: Editing rc.local
 echo "Configuring rc.local to start MTGuardian on boot..."
+RC_LOCAL_PATH="/etc/rc.local"
 if [ -f $RC_LOCAL_PATH ]; then
     cp $RC_LOCAL_PATH ${RC_LOCAL_PATH}.backup
     error_check "Failed to backup existing rc.local."
@@ -42,7 +52,7 @@ sudo chown root:root $RC_LOCAL_PATH
 sudo chmod 700 $RC_LOCAL_PATH
 error_check "Failed to update rc.local."
 
-# Step 3: Configuring MTGuardian.settings
+# Step 4: Configuring MTGuardian.settings
 echo "Configuring MTGuardian.settings..."
 read -p "Enter the full path to MT core directory (default: $DEFAULT_MT_CORE_DIR): " mt_core_dir
 mt_core_dir=${mt_core_dir:-$DEFAULT_MT_CORE_DIR}
@@ -62,8 +72,9 @@ sed -i "s|^MT_CORE_SERVER_NAME=.*|MT_CORE_SERVER_NAME='$mt_core_server_name'|" M
 sed -i "s|^TG_API_TOKEN=.*|TG_API_TOKEN='$tg_api_token'|" MTGuardian.settings
 sed -i "s|^TG_CHAT_ID=.*|TG_CHAT_ID='$tg_chat_id'|" MTGuardian.settings
 
-# Step 4: Setting permissions
+# Step 5: Setting permissions
 chmod 700 MTGuardian
 error_check "Failed to set permissions for MTGuardian."
 
 echo "Setup completed successfully. MTGuardian is configured to run on boot."
+echo "If you want to support the further development of this script please donate to the TRC20 wallet: TCgJDoL6qFj6NaQjqirycmqSTXoQqqZ1E3"
