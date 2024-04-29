@@ -51,7 +51,7 @@ error_check "Failed to download files. Check your internet connection and the re
 echo "Configuring rc.local to start MTGuardian on boot..."
 RC_LOCAL_PATH="/etc/rc.local"
 if [ -f $RC_LOCAL_PATH ]; then
-    cp $RC_LOCAL_PATH ${RC_LOCAL_PATH}.backup
+    sudo cp $RC_LOCAL_PATH ${RC_LOCAL_PATH}.backup
     error_check "Failed to backup existing rc.local."
 fi
 
