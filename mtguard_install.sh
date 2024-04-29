@@ -21,7 +21,7 @@ error_check() {
 
 echo "Starting MTGuardian Setup Wizard..."
 
-# Step 1: Prepare Installation Directory
+# Step 1: Check if Installation Directory exists and is not empty
 if [ -d "$INSTALL_DIR" ] && [ "$(ls -A $INSTALL_DIR)" ]; then
     read -p "The installation directory '$INSTALL_DIR' already exists and is not empty. Do you want to delete it? (y/n): " delete_dir
     if [[ "$delete_dir" == "y" ]]; then
@@ -34,6 +34,7 @@ if [ -d "$INSTALL_DIR" ] && [ "$(ls -A $INSTALL_DIR)" ]; then
     fi
 fi
 
+# Step 2: Prepare Installation Directory
 echo "Preparing installation directory..."
 mkdir -p $INSTALL_DIR
 error_check "Failed to create installation directory."
@@ -41,12 +42,12 @@ error_check "Failed to create installation directory."
 cd $INSTALL_DIR
 error_check "Failed to change to installation directory."
 
-# Step 2: Downloading Files
+# Step 3: Downloading Files
 echo "Downloading necessary files from GitHub..."
 git clone $GITHUB_REPO .
 error_check "Failed to download files. Check your internet connection and the repository URL."
 
-# Step 3: Editing rc.local
+# Step 4: Editing rc.local
 echo "Configuring rc.local to start MTGuardian on boot..."
 RC_LOCAL_PATH="/etc/rc.local"
 if [ -f $RC_LOCAL_PATH ]; then
@@ -60,7 +61,7 @@ sudo chown root:root $RC_LOCAL_PATH
 sudo chmod 700 $RC_LOCAL_PATH
 error_check "Failed to update rc.local."
 
-# Step 4: Configuring MTGuardian.settings
+# Step 5: Configuring MTGuardian.settings
 echo "Configuring MTGuardian.settings..."
 read -p "Enter the full path to MT core directory (default: $DEFAULT_MT_CORE_DIR): " mt_core_dir
 mt_core_dir=${mt_core_dir:-$DEFAULT_MT_CORE_DIR}
@@ -86,11 +87,11 @@ else
     sed -i "s|^TG_CHAT_ID=.*|TG_CHAT_ID='$tg_chat_id'|" MTGuardian.settings
 fi
 
-# Step 5: Setting permissions
+# Step 6: Setting permissions
 chmod 700 MTGuardian
 error_check "Failed to set permissions for MTGuardian."
 
-# Step 6: Check MTCore Status and Restart/Start
+# Step 7: Check MTCore Status and Restart/Start
 echo "Checking MTCore process..."
 if pgrep -f "$mt_core_dir/MTCore" > /dev/null; then
     read -p "MTCore is currently running. Would you like to restart it? (y/n): " confirm_restart
@@ -116,7 +117,7 @@ else
     fi
 fi
 
-# Step 7: Final Countdown before completing setup
+# Step 8: Final Countdown before completing setup
 echo "Finalizing setup in 30 seconds..."
 for i in {30..1}; do
     echo -ne "$i seconds remaining...\r"
